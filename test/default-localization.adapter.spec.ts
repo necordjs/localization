@@ -21,4 +21,8 @@ describe('DefaultLocalizationAdapter', () => {
 	it('should replace placeholders', () => {
 		expect(adapter.getTranslation('hello', 'en', { name: 'world' })).toBe('Hello, world!');
 	});
+
+	it('should return key if translation not found', () => {
+		expect(adapter.getTranslation('goodbye', 'en', { name: 'world' })).toBe('goodbye');
+	});
 });

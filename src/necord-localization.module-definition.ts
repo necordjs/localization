@@ -1,6 +1,7 @@
 import { ConfigurableModuleBuilder } from '@nestjs/common';
 import { NecordLocalizationOptions } from './interfaces';
 import { DefaultLocalizationAdapter } from './adapters';
+import { LOCALIZATION_ADAPTER } from './providers';
 
 export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
 	new ConfigurableModuleBuilder<NecordLocalizationOptions>()
@@ -12,8 +13,9 @@ export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
 				...definition,
 				providers: [
 					...definition.providers,
-					{ provide: extras.adapter.constructor, useValue: extras.adapter }
-				]
+					{ provide: LOCALIZATION_ADAPTER, useValue: extras.adapter }
+				],
+				exports: [...definition.exports, LOCALIZATION_ADAPTER]
 			})
 		)
 		.build();

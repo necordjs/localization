@@ -9,7 +9,7 @@ export class DefaultLocalizationAdapter extends BaseLocalizationAdapter<DefaultL
 	public getTranslation(
 		key: string,
 		locale: string,
-		placeholders: Record<string, string>
+		placeholders?: Record<string, string>
 	): string {
 		const translations = this.getTranslations(locale);
 		const translation = translations[key] ?? this.getFallbackTranslation(key);
