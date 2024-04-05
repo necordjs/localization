@@ -102,7 +102,7 @@ Then, we can inject the `LOCALIZATION_ADAPTER` into our service and use it to lo
 
 ```typescript
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
-import { DefaultLocalizationAdapter, DescriptionTranslations, LOCALIZATION_ADAPTER, NameTranslations } from '@necord/pagination';
+import { DefaultLocalizationAdapter, DescriptionTranslations, LOCALIZATION_ADAPTER, NameTranslations } from '@necord/localization';
 import { Context, SlashCommand, SlashCommandContext } from 'necord';
 
 @Injectable()
