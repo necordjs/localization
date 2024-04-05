@@ -15,7 +15,7 @@ export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
 					...definition.providers,
 					{ provide: LOCALIZATION_ADAPTER, useValue: extras.adapter }
 				],
-				exports: [...definition.exports, LOCALIZATION_ADAPTER]
+				exports: [...(definition.exports ?? []), LOCALIZATION_ADAPTER]
 			})
 		)
 		.build();

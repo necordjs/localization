@@ -4,6 +4,7 @@ import { NecordLocalizationService } from './necord-localization.service';
 
 @Global()
 @Module({
-	providers: [NecordLocalizationService]
+	providers: [NecordLocalizationService],
+	exports: []
 })
 export class NecordLocalizationModule extends ConfigurableModuleClass {}

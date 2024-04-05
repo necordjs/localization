@@ -1,31 +1,144 @@
-# nestjs-open-source-template
+<div align="center">
+   <h1>
+       <a href="#"><img src="https://necord.org/img/logo.png"></a>
+   </h1>
+  🌍 A lightweight Localization module for <b><a href="https://necord.org/">Necord</a></b>
+   <br/><br/>
+   <a href="https://necord.org">Documentation ✨</a> &emsp; <a href="https://github.com/SocketSomeone/necord">Source code 🪡</a> &emsp; <a href="https://github.com/necordjs/samples">Examples 🛠️</a> &emsp; <a href="https://discord.gg/mcBYvMTnwP">Community 💬</a>
+</div>
 
-This is a template for creating a new open source project in NestJS.
 
-## Features
-* [TypeScript](https://www.typescriptlang.org/)
-* [Jest](https://jestjs.io/)
-* [ESLint](https://eslint.org/)
-* [Prettier](https://prettier.io/)
-* GitHub Actions
-* [Dependabot](https://dependabot.com/)
-* Semantic Release
-* Commitizen
-* Commitlint
-* [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
-* [Semantic Versioning](https://semver.org/)
+<br/>
+
+<p align="center">
+    <a href='https://img.shields.io/npm/v/necord'><img src="https://img.shields.io/npm/v/necord" alt="NPM Version" /></a>
+    <a href='https://img.shields.io/npm/l/necord'><img src="https://img.shields.io/npm/l/necord" alt="NPM License" /></a>
+    <a href='https://img.shields.io/npm/dm/necord'><img src="https://img.shields.io/npm/dm/necord" alt="NPM Downloads" /></a>
+    <a href='https://img.shields.io/github/last-commit/necordjs/necord'><img src="https://img.shields.io/github/last-commit/SocketSomeone/necord" alt="Last commit" /></a>
+</p>
+
+## About
+
+`@necord/localization` is a lightweight localization module for [Necord](https://necord.org/). It allows you to easily localize your bot's
+commands and messages. The module provides a simple API for managing locales and translations, as well as a powerful localization adapter
+system.
+
+## Installation
+
+**Node.js 16.6.0 or newer is required.**
+
+```bash
+$ npm i @necord/localization necord discord.js
+$ yarn add @necord/localization necord discord.js
+$ pnpm add @necord/localization necord discord.js
+```
 
 ## Usage
-1. Click the "Use this template" button to create a new repository from this template.
-2. Clone the new repository to your local machine.
-3. Run `npm install` to install dependencies.
-4. Replace name, description, and other fields in `package.json` with your own.
-5. Replace the contents of this file with your own.
-6. Replace name of package at github actions workflow file
 
-## Scripts
-* `npm run build` - Compile TypeScript to JavaScript.
-* `npm run lint` - Lint TypeScript files.
-* `npm run test` - Run tests.
-* `npm run publish:npm` - Publish package to npm.
-* `npm run publish:dev` - Publish package to npm with `dev` tag.
+Once the installation process is complete, we can import the `NecordLocalizationModule` with your `NecordModule` into the
+root `AppModule`:
+
+```typescript
+import { NecordModule } from 'necord';
+import { Module } from '@nestjs/common';
+import { NecordLocalizationModule, DefaultLocalizationAdapter } from '@necord/localization';
+import { AppService } from './app.service';
+
+@Module({
+    imports: [
+        NecordModule.forRoot({
+            token: process.env.DISCORD_TOKEN,
+            intents: [
+                IntentsBitField.Flags.Guilds,
+                IntentsBitField.Flags.DirectMessages,
+                IntentsBitField.Flags.GuildMembers,
+                IntentsBitField.Flags.GuildMessages,
+                IntentsBitField.Flags.MessageContent
+            ],
+            prefix: '!',
+            development: [process.env.DISCORD_TEST_GUILD]
+        }),
+        NecordLocalizationModule.forRoot({
+            adapter: new DefaultLocalizationAdapter({
+                fallbackLocale: 'en-US',
+                locales: {
+                    'en-US': {
+                        'commands.ping.name': 'ping',
+                        'commands.ping.description': 'Pong!'
+                    },
+                    ru: {
+                        'commands.ping.name': 'пинг',
+                        'commands.ping.description': 'Понг!'
+                    }
+                }
+            })
+        })
+    ],
+    providers
+})
+class AppModule {
+}
+```
+Also, you can create your own localization adapter. Just implement the `LocalizationAdapter` interface:
+
+```typescript
+import { BaseLocalizationAdapter } from '@necord/localization';
+
+interface CustomLocalizationOptions {
+    fallbackLocale: string;
+    locales: Record<string, Record<string, string>>;
+}
+
+export class CustomLocalizationAdapter extends BaseLocalizationAdapter<CustomLocalizationOptions> {
+    public getTranslation(key: string, locale: string, ...args: any[]): string {
+        return `${key} by ${locale}`;
+    }
+}
+
+```
+
+
+Then, we can inject the `LOCALIZATION_ADAPTER` into our service and use it to localize our commands and messages:
+
+```typescript
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { DefaultLocalizationAdapter, DescriptionTranslations, LOCALIZATION_ADAPTER, NameTranslations } from '@necord/pagination';
+import { Context, SlashCommand, SlashCommandContext } from 'necord';
+
+@Injectable()
+export class AppService implements OnModuleInit {
+    public constructor(
+        @Inject(LOCALIZATION_ADAPTER)
+        private readonly localizationAdapter: DefaultLocalizationAdapter
+    ) {
+    }
+
+    @NameTranslations('commands.ping.name')
+    @DescriptionTranslations('commands.ping.description')
+    @SlashCommand({ name: 'ping', description: 'Pong!' })
+    public ping(@Context() [interaction]: SlashCommandContext) {
+        const message = this.localizationAdapter.getTranslation(
+            'commands.ping.description',
+            interaction.locale
+        );
+        return interaction.reply(message);
+    }
+}
+```
+
+Decorators `NameTranslations` and `DescriptionTranslations` are used to localize the command name and description. You pass the translation key or localization map as an argument to the decorator.
+
+Congratulations! You have successfully created your first localized command with Necord!
+
+## Backers
+
+<a href="https://opencollective.com/necord" target="_blank"><img src="https://opencollective.com/necord/backers.svg?width=1000"></a>
+
+## Stay in touch
+
+* Author - [Alexey Filippov](https://t.me/socketsomeone)
+* Twitter - [@SocketSomeone](https://twitter.com/SocketSomeone)
+
+## License
+
+[MIT](https://github.com/necordjs/necord/blob/master/LICENSE) © [Alexey Filippov](https://github.com/SocketSomeone)
