@@ -41,7 +41,7 @@ root `AppModule`:
 ```typescript
 import { NecordModule } from 'necord';
 import { Module } from '@nestjs/common';
-import { NecordLocalizationModule, DefaultLocalizationAdapter } from '@necord/localization';
+import { NecordLocalizationModule, DefaultLocalizationAdapter, LocaleResolvers } from '@necord/localization';
 import { AppService } from './app.service';
 
 @Module({
@@ -59,6 +59,7 @@ import { AppService } from './app.service';
             development: [process.env.DISCORD_TEST_GUILD]
         }),
         NecordLocalizationModule.forRoot({
+            resolver: LocaleResolvers.User,
             adapter: new DefaultLocalizationAdapter({
                 fallbackLocale: 'en-US',
                 locales: {
@@ -125,6 +126,34 @@ export class AppService implements OnModuleInit {
     }
 }
 ```
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { DefaultLocalizationAdapter, DescriptionTranslations, LOCALIZATION_ADAPTER, NameTranslations } from '@necord/localization';
+import { Context, SlashCommand, SlashCommandContext } from 'necord';
+
+@Injectable()
+export class AppService implements OnModuleInit {
+public constructor(
+@Inject(LOCALIZATION_ADAPTER)
+private readonly localizationAdapter: DefaultLocalizationAdapter
+) {
+}
+
+    @NameTranslations('commands.ping.name')
+    @DescriptionTranslations('commands.ping.description')
+    @SlashCommand({ name: 'ping', description: 'Pong!' })
+    public ping(@Context() [interaction]: SlashCommandContext) {
+        const message = this.localizationAdapter.getTranslation(
+            'commands.ping.description',
+            interaction.locale
+        );
+        return interaction.reply(message);
+    }
+}
+```
+Or you can use `@CurrentTranslate` decorator to get the current translation:
+
+```typescript
+import { Injectable, OnModuleInit } from '@nestjs/common';
 
 Decorators `NameTranslations` and `DescriptionTranslations` are used to localize the command name and description. You pass the translation key or localization map as an argument to the decorator.
 

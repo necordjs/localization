@@ -2,7 +2,7 @@ import { Module, Provider } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NecordModule } from 'necord';
 import { IntentsBitField } from 'discord.js';
-import { DefaultLocalizationAdapter, NecordLocalizationModule } from '../src';
+import { DefaultLocalizationAdapter, LocaleResolvers, NecordLocalizationModule } from '../src';
 
 export const createApplication = (...providers: Provider[]) => {
 	@Module({
@@ -20,6 +20,7 @@ export const createApplication = (...providers: Provider[]) => {
 				development: [process.env.DISCORD_TEST_GUILD]
 			}),
 			NecordLocalizationModule.forRoot({
+				resolver: LocaleResolvers.User,
 				adapter: new DefaultLocalizationAdapter({
 					fallbackLocale: 'en-US',
 					locales: {
