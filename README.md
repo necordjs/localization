@@ -41,7 +41,7 @@ root `AppModule`:
 ```typescript
 import { NecordModule } from 'necord';
 import { Module } from '@nestjs/common';
-import { NecordLocalizationModule, DefaultLocalizationAdapter, LocaleResolvers } from '@necord/localization';
+import { NecordLocalizationModule, DefaultLocalizationAdapter, UserResolver } from '@necord/localization';
 import { AppService } from './app.service';
 
 @Module({
@@ -59,7 +59,7 @@ import { AppService } from './app.service';
             development: [process.env.DISCORD_TEST_GUILD]
         }),
         NecordLocalizationModule.forRoot({
-            resolver: LocaleResolvers.User,
+            resolvers: UserResolver,
             // Also you can provide class for support injection by @Inject
             adapter: new DefaultLocalizationAdapter({
                 fallbackLocale: 'en-US',
