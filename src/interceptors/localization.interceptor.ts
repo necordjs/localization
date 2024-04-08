@@ -1,35 +1,49 @@
-import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+	CallHandler,
+	ExecutionContext,
+	Inject,
+	Injectable,
+	NestInterceptor,
+	OnModuleInit,
+	Type
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { NecordContextType, NecordExecutionContext } from 'necord';
-import { LOCALIZATION_ADAPTER } from '../providers';
+import { LOCALIZATION_ADAPTER, LOCALIZATION_RESOLVERS } from '../providers';
 import { BaseLocalizationAdapter } from '../adapters';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { CommandContext, NecordLocalizationOptions, TranslationFn } from '../interfaces';
+import { LocaleResolver, NecordLocalizationOptions, TranslationFn } from '../interfaces';
 import { MODULE_OPTIONS_TOKEN } from '../necord-localization.module-definition';
-import { LocaleResolvers } from '../enums';
-import { Reflector } from '@nestjs/core';
-import { LocaleResolver } from '../decorators';
+import { ModuleRef } from '@nestjs/core';
 
 @Injectable()
-export class LocalizationInterceptor implements NestInterceptor {
+export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 	private static readonly LOCALIZATION_CONTEXT = new AsyncLocalStorage<TranslationFn>();
 
 	public static getCurrentTranslationFn(): TranslationFn {
 		return LocalizationInterceptor.LOCALIZATION_CONTEXT.getStore();
 	}
 
+	private cachedResolvers: LocaleResolver[];
+
 	public constructor(
 		@Inject(LOCALIZATION_ADAPTER)
 		private readonly localizationAdapter: BaseLocalizationAdapter,
+		@Inject(LOCALIZATION_RESOLVERS)
+		private readonly resolvers: (LocaleResolver | Type<LocaleResolver>)[],
 		@Inject(MODULE_OPTIONS_TOKEN)
 		private readonly localizationOptions: NecordLocalizationOptions,
-		private readonly reflector: Reflector
+		private readonly moduleRef: ModuleRef
 	) {}
 
-	public intercept(
+	public async onModuleInit(): Promise<void> {
+		this.cachedResolvers = await Promise.all(this.resolvers.map(r => this.getResolver(r)));
+	}
+
+	public async intercept(
 		context: ExecutionContext,
 		next: CallHandler<any>
-	): Observable<any> | Promise<Observable<any>> {
+	): Promise<Observable<any>> {
 		if (context.getType<NecordContextType>() !== 'necord') return next.handle();
 
 		const necordContext = NecordExecutionContext.create(context);
@@ -39,7 +53,7 @@ export class LocalizationInterceptor implements NestInterceptor {
 			return next.handle();
 		}
 
-		const locale = this.getLocale(necordContext);
+		const locale = await this.getLocale(necordContext);
 
 		return LocalizationInterceptor.LOCALIZATION_CONTEXT.run(
 			this.getTranslationFn(locale),
@@ -47,13 +61,36 @@ export class LocalizationInterceptor implements NestInterceptor {
 		);
 	}
 
-	private getLocale(ctx: NecordExecutionContext): string {
-		const [interaction] = ctx.getContext<CommandContext>();
-		const resolver =
-			this.reflector.get<LocaleResolvers>(LocaleResolver.KEY, ctx.getHandler()) ??
-			this.localizationOptions.resolver;
+	private async getLocale(ctx: ExecutionContext): Promise<string> {
+		let language = null;
 
-		return resolver === LocaleResolvers.User ? interaction.locale : interaction.guildLocale;
+		for (const resolver of this.cachedResolvers) {
+			language = resolver.resolve(ctx);
+
+			if (language instanceof Promise) {
+				language = await (language as Promise<string>);
+			}
+
+			if (language !== undefined) {
+				break;
+			}
+		}
+
+		return Array.isArray(language) ? language[0] : language;
+	}
+
+	private async getResolver(
+		resolver: LocaleResolver | Type<LocaleResolver>
+	): Promise<LocaleResolver> {
+		if (resolver instanceof Function) {
+			try {
+				return this.moduleRef.get(resolver, { strict: false });
+			} catch (e) {
+				return this.moduleRef.create(resolver);
+			}
+		}
+
+		return resolver;
 	}
 
 	private getTranslationFn(locale: string): TranslationFn {

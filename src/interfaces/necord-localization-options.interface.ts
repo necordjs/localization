@@ -1,8 +1,13 @@
 import { BaseLocalizationAdapter } from '../adapters';
-import { LocaleResolvers } from '../enums';
 import { Type } from '@nestjs/common';
+import { LocaleResolver } from './locale-resolver.interface';
+
+export type NecordLocalizationResolvers =
+	| (LocaleResolver | Type<LocaleResolver>)[]
+	| Type<LocaleResolver>
+	| LocaleResolver;
 
 export interface NecordLocalizationOptions {
 	adapter: BaseLocalizationAdapter | Type<BaseLocalizationAdapter>;
-	resolver?: LocaleResolvers;
+	resolvers: NecordLocalizationResolvers;
 }
