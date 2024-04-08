@@ -60,6 +60,7 @@ import { AppService } from './app.service';
         }),
         NecordLocalizationModule.forRoot({
             resolver: LocaleResolvers.User,
+            // Also you can provide class for support injection by @Inject
             adapter: new DefaultLocalizationAdapter({
                 fallbackLocale: 'en-US',
                 locales: {
