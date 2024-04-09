@@ -1,6 +1,6 @@
 {
 	"name": "@necord/localization",
-	"description": "🌍Localize your Discord bot with Necord!",
+	"description": "Localize your Discord bot with Necord!",
 	"version": "3.0.1",
 	"scripts": {
 		"build": "rimraf dist && tsc -p tsconfig.build.json",
