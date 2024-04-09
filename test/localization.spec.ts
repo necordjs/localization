@@ -4,9 +4,8 @@ import { createApplication } from './application.spec';
 import {
 	CurrentTranslate,
 	DefaultLocalizationAdapter,
-	DescriptionTranslations,
 	LOCALIZATION_ADAPTER,
-	NameTranslations,
+	localizationMapByKey,
 	TranslationFn
 } from '../src';
 
@@ -17,9 +16,12 @@ class Localization {
 		private readonly localizationAdapter: DefaultLocalizationAdapter
 	) {}
 
-	@NameTranslations('commands.ping.name')
-	@DescriptionTranslations('commands.ping.description')
-	@SlashCommand({ name: 'ping', description: 'Pong!' })
+	@SlashCommand({
+		name: 'ping',
+		description: 'Pong!',
+		nameLocalizations: localizationMapByKey('commands.ping.name'),
+		descriptionLocalizations: localizationMapByKey('commands.ping.description')
+	})
 	public ping(
 		@Context() [interaction]: SlashCommandContext,
 		@CurrentTranslate() t: TranslationFn

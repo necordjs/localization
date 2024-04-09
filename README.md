@@ -104,7 +104,7 @@ Then, we can inject the `LOCALIZATION_ADAPTER` into our service and use it to lo
 
 ```typescript
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
-import { DefaultLocalizationAdapter, DescriptionTranslations, LOCALIZATION_ADAPTER, NameTranslations } from '@necord/localization';
+import { DefaultLocalizationAdapter, localizationMapByKey, LOCALIZATION_ADAPTER } from '@necord/localization';
 import { Context, SlashCommand, SlashCommandContext } from 'necord';
 
 @Injectable()
@@ -115,31 +115,12 @@ export class AppService implements OnModuleInit {
     ) {
     }
 
-    @NameTranslations('commands.ping.name')
-    @DescriptionTranslations('commands.ping.description')
-    @SlashCommand({ name: 'ping', description: 'Pong!' })
-    public ping(@Context() [interaction]: SlashCommandContext) {
-        const message = this.localizationAdapter.getTranslation(
-            'commands.ping.description',
-            interaction.locale
-        );
-        return interaction.reply(message);
-    }
-}
-```
-
-Or you can use `@CurrentTranslate` decorator to get the current translation from context:
-
-```typescript
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
-import { DefaultLocalizationAdapter, DescriptionTranslations, CurrentTranslate, TranslationFn, NameTranslations } from '@necord/localization';
-import { Context, SlashCommand, SlashCommandContext } from 'necord';
-
-@Injectable()
-export class AppService implements OnModuleInit {
-    @NameTranslations('commands.ping.name')
-    @DescriptionTranslations('commands.ping.description')
-    @SlashCommand({ name: 'ping', description: 'Pong!' })
+    @SlashCommand({
+        name: 'ping',
+        description: 'Pong!',
+        nameLocalizations: localizationMapByKey('commands.ping.name'),
+        descriptionLocalizations: localizationMapByKey('commands.ping.description')
+    })
     public ping(
         @Context() [interaction]: SlashCommandContext,
         @CurrentTranslate() t: TranslationFn
@@ -150,7 +131,30 @@ export class AppService implements OnModuleInit {
 }
 ```
 
-Decorators `NameTranslations` and `DescriptionTranslations` are used to localize the command name and description. You pass the translation key or localization map as an argument to the decorator.
+Or you can use `@CurrentTranslate` decorator to get the current translation from context:
+
+```typescript
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { DefaultLocalizationAdapter, CurrentTranslate, TranslationFn, localizationMapByKey } from '@necord/localization';
+import { Context, SlashCommand, SlashCommandContext } from 'necord';
+
+@Injectable()
+export class AppService implements OnModuleInit {
+    @SlashCommand({
+        name: 'ping',
+        description: 'Pong!',
+        nameLocalizations: localizationMapByKey('commands.ping.name'),
+        descriptionLocalizations: localizationMapByKey('commands.ping.description')
+    })
+    public ping(
+        @Context() [interaction]: SlashCommandContext,
+        @CurrentTranslate() t: TranslationFn
+    ) {
+        const message = t('commands.ping.description');
+        return interaction.reply(message);
+    }
+}
+```
 
 Congratulations! You have successfully created your first localized command with Necord!
 

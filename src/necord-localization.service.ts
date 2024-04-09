@@ -1,7 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { CommandDiscovery, CommandsService } from 'necord';
-import { Reflector } from '@nestjs/core';
-import { DescriptionTranslations, NameTranslations } from './decorators';
+import { DiscoveryService, Reflector } from '@nestjs/core';
 import { Locale, LocalizationMap } from 'discord-api-types/v10';
 import { LOCALIZATION_ADAPTER } from './providers';
 import { DefaultLocalizationAdapter } from './adapters';
@@ -12,40 +11,43 @@ export class NecordLocalizationService implements OnModuleInit {
 		@Inject(LOCALIZATION_ADAPTER)
 		private readonly localizationAdapter: DefaultLocalizationAdapter,
 		private readonly commandsService: CommandsService,
-		private readonly reflector: Reflector
+		private readonly reflector: Reflector,
+		private readonly discoveryService: DiscoveryService
 	) {}
 
 	public onModuleInit() {
-		const commands = this.commandsService.getCommands();
+		const providers = this.discoveryService.getProviders();
+
+		const commands = this.commandsService.getCommands().flatMap(command => {
+			if (command.isContextMenu()) {
+				return command;
+			}
+
+			if (!command.isSlashCommand()) {
+				return command;
+			}
+
+			const rootCommand = command;
+			const subcommandGroups = [...rootCommand.getSubcommands().values()];
+			const subcommands = subcommandGroups.flatMap(group => [
+				...group.getSubcommands().values()
+			]);
+
+			return [rootCommand, ...subcommandGroups, ...subcommands] as CommandDiscovery[];
+		});
 
 		for (const command of commands) {
-			const metadata = this.getLocalizationMetadata(command);
-
-			const nameLocalized = this.getTranslatedLocalizationMap(metadata.name);
-			const descriptionLocalized = this.getTranslatedLocalizationMap(metadata.description);
-
 			const commandMetadata: Record<string, any> = command['meta'];
-			commandMetadata.nameLocalizations = nameLocalized;
-			commandMetadata.descriptionLocalizations = descriptionLocalized;
+			commandMetadata.nameLocalizations = this.getLocalizationMap(
+				commandMetadata.nameLocalizations
+			);
+			commandMetadata.descriptionLocalizations = this.getLocalizationMap(
+				commandMetadata.descriptionLocalizations
+			);
 		}
 	}
 
-	private getLocalizationMetadata(
-		command: CommandDiscovery
-	): Record<string, string | LocalizationMap> {
-		const name = this.reflector.get<string | LocalizationMap>(
-			NameTranslations.KEY,
-			command.getHandler()
-		);
-		const description = this.reflector.get<string | LocalizationMap>(
-			DescriptionTranslations.KEY,
-			command.getHandler()
-		);
-
-		return { name, description };
-	}
-
-	private getTranslatedLocalizationMap(mapOrString: string | LocalizationMap): LocalizationMap {
+	private getLocalizationMap(mapOrString: string | LocalizationMap): LocalizationMap {
 		if (!mapOrString) return;
 
 		if (typeof mapOrString === 'string') {
