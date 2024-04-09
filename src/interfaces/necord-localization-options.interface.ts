@@ -8,6 +8,6 @@ export type NecordLocalizationResolvers =
 	| LocaleResolver;
 
 export interface NecordLocalizationOptions {
-	adapter: BaseLocalizationAdapter | Type<BaseLocalizationAdapter>;
+	adapter: BaseLocalizationAdapter;
 	resolvers: NecordLocalizationResolvers;
 }

@@ -1,6 +1,5 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { CommandDiscovery, CommandsService } from 'necord';
-import { DiscoveryService, Reflector } from '@nestjs/core';
 import { Locale, LocalizationMap } from 'discord-api-types/v10';
 import { LOCALIZATION_ADAPTER } from './providers';
 import { DefaultLocalizationAdapter } from './adapters';
@@ -10,14 +9,10 @@ export class NecordLocalizationService implements OnModuleInit {
 	public constructor(
 		@Inject(LOCALIZATION_ADAPTER)
 		private readonly localizationAdapter: DefaultLocalizationAdapter,
-		private readonly commandsService: CommandsService,
-		private readonly reflector: Reflector,
-		private readonly discoveryService: DiscoveryService
+		private readonly commandsService: CommandsService
 	) {}
 
 	public onModuleInit() {
-		const providers = this.discoveryService.getProviders();
-
 		const commands = this.commandsService.getCommands().flatMap(command => {
 			if (command.isContextMenu()) {
 				return command;

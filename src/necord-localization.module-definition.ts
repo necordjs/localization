@@ -1,4 +1,4 @@
-import { ConfigurableModuleBuilder } from '@nestjs/common';
+import { ConfigurableModuleBuilder, Provider } from '@nestjs/common';
 import { NecordLocalizationOptions } from './interfaces';
 import { DefaultLocalizationAdapter } from './adapters';
 import { LOCALIZATION_ADAPTER, LOCALIZATION_RESOLVERS } from './providers';
@@ -11,13 +11,11 @@ export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
 		.setExtras<NecordLocalizationOptions>(
 			{ adapter: DefaultLocalizationAdapter, resolvers: UserResolver },
 			(definition, extras) => {
-				const adapterProvider =
-					extras.adapter instanceof Function
-						? {
-								provide: LOCALIZATION_ADAPTER,
-								useClass: extras.adapter
-							}
-						: { provide: LOCALIZATION_ADAPTER, useValue: extras.adapter };
+				const adapterProvider: Provider = {
+					provide: LOCALIZATION_ADAPTER,
+					useFactory: (options: NecordLocalizationOptions) => options.adapter,
+					inject: [MODULE_OPTIONS_TOKEN]
+				};
 
 				const resolversProviders = {
 					provide: LOCALIZATION_RESOLVERS,
@@ -28,7 +26,7 @@ export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
 
 				return {
 					...definition,
-					providers: [...definition.providers, adapterProvider, resolversProviders],
+					providers: [adapterProvider, ...definition.providers, resolversProviders],
 					exports: [...(definition.exports ?? []), adapterProvider]
 				};
 			}
