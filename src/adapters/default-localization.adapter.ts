@@ -21,11 +21,11 @@ export class DefaultLocalizationAdapter extends BaseLocalizationAdapter<DefaultL
 	}
 
 	private getTranslations(locale: string): Record<string, string> {
-		return this.options.locales?.[locale] ?? {};
+		return this.options?.locales?.[locale] ?? {};
 	}
 
 	private getFallbackTranslation(key: string): string {
-		const fallbackLocale = this.options.fallbackLocale;
+		const fallbackLocale = this.options?.fallbackLocale ?? 'en-US';
 		const translations = this.getTranslations(fallbackLocale);
 
 		return translations[key] ?? key;

@@ -9,7 +9,10 @@ export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
 		.setClassMethodName('forRoot')
 		.setFactoryMethodName('createModuleConfig')
 		.setExtras<NecordLocalizationOptions>(
-			{ adapter: DefaultLocalizationAdapter, resolvers: UserResolver },
+			{
+				adapter: new DefaultLocalizationAdapter(),
+				resolvers: UserResolver
+			},
 			(definition, extras) => {
 				const adapterProvider: Provider = {
 					provide: LOCALIZATION_ADAPTER,
