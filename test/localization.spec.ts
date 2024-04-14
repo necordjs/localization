@@ -1,5 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Context, SlashCommand, SlashCommandContext } from 'necord';
+import {
+	Context,
+	createCommandGroupDecorator,
+	SlashCommand,
+	SlashCommandContext,
+	Subcommand
+} from 'necord';
 import { createApplication } from './application.spec';
 import {
 	CurrentTranslate,
@@ -9,6 +15,12 @@ import {
 	TranslationFn
 } from '../src';
 
+const PingCommands = createCommandGroupDecorator({
+	name: 'ping',
+	description: 'Ping commands'
+});
+
+@PingCommands()
 @Injectable()
 class Localization {
 	public constructor(
@@ -16,7 +28,7 @@ class Localization {
 		private readonly localizationAdapter: DefaultLocalizationAdapter
 	) {}
 
-	@SlashCommand({
+	@Subcommand({
 		name: 'ping',
 		description: 'Pong!',
 		nameLocalizations: localizationMapByKey('commands.ping.name'),

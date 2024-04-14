@@ -40,7 +40,7 @@ export class NecordLocalizationService implements OnModuleInit {
 				commandMetadata.descriptionLocalizations
 			);
 
-			if (command.isSlashCommand()) {
+			if (command.isSlashCommand() && command.getSubcommands().size === 0) {
 				const rawOptions = command.getRawOptions();
 
 				for (const key in rawOptions) {
@@ -52,8 +52,6 @@ export class NecordLocalizationService implements OnModuleInit {
 						optionMetadata.description_localizations
 					);
 				}
-
-				console.log(command.getRawOptions());
 			}
 		}
 	}
