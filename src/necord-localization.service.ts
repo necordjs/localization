@@ -1,6 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { CommandDiscovery, CommandsService } from 'necord';
-import { Locale, LocalizationMap } from 'discord-api-types/v10';
+import { LocalizationMap } from 'discord-api-types/v10';
 import { LOCALIZATION_ADAPTER } from './providers';
 import { DefaultLocalizationAdapter } from './adapters';
 
@@ -39,20 +39,29 @@ export class NecordLocalizationService implements OnModuleInit {
 			commandMetadata.descriptionLocalizations = this.getLocalizationMap(
 				commandMetadata.descriptionLocalizations
 			);
+
+			if (command.isSlashCommand()) {
+				const rawOptions = command.getRawOptions();
+
+				for (const key in rawOptions) {
+					const optionMetadata: Record<string, any> = rawOptions[key];
+					optionMetadata.name_localizations = this.getLocalizationMap(
+						optionMetadata.name_localizations
+					);
+					optionMetadata.description_localizations = this.getLocalizationMap(
+						optionMetadata.description_localizations
+					);
+				}
+
+				console.log(command.getRawOptions());
+			}
 		}
 	}
 
-	private getLocalizationMap(mapOrString: string | LocalizationMap): LocalizationMap {
-		if (!mapOrString) return;
+	private getLocalizationMap(map: LocalizationMap): LocalizationMap {
+		if (!map) return;
 
-		if (typeof mapOrString === 'string') {
-			return Object.values(Locale).reduce((acc, locale) => {
-				acc[locale] = this.localizationAdapter.getTranslation(mapOrString, locale);
-				return acc;
-			}, {});
-		}
-
-		return Object.entries(mapOrString).reduce((acc, [locale, value]) => {
+		return Object.entries(map).reduce((acc, [locale, value]) => {
 			acc[locale] = this.localizationAdapter.getTranslation(value, locale);
 			return acc;
 		}, {});
