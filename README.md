@@ -25,7 +25,7 @@ system.
 
 ## Installation
 
-**Node.js 16.6.0 or newer is required.**
+**Node.js 18.0.0 or newer is required.**
 
 ```bash
 $ npm i @necord/localization necord discord.js
