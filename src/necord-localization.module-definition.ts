@@ -7,7 +7,7 @@ import { UserResolver } from './resolvers';
 export const { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } =
 	new ConfigurableModuleBuilder<NecordLocalizationOptions>()
 		.setClassMethodName('forRoot')
-		.setFactoryMethodName('createModuleConfig')
+		.setFactoryMethodName('createNecordLocalizationOptions')
 		.setExtras<NecordLocalizationOptions>(
 			{
 				adapter: new DefaultLocalizationAdapter(),
