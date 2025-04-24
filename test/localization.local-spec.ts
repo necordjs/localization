@@ -6,7 +6,7 @@ import {
 	SlashCommandContext,
 	Subcommand
 } from 'necord';
-import { createApplication } from './application.spec';
+import { createApplication } from './application.local-spec';
 import {
 	CurrentTranslate,
 	DefaultLocalizationAdapter,
