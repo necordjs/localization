@@ -54,4 +54,4 @@ class Localization {
 	// }
 }
 
-createApplication(Localization);
+void createApplication(Localization);
