@@ -29,9 +29,9 @@ export class NestedLocalizationAdapter extends BaseLocalizationAdapter<NestedLoc
 		return this.options?.locales?.[locale] ?? {};
 	}
 
-	private findTranslation(translations: TranslationData, key: string): string | undefined {
+	private findTranslation(translations: TranslationData, key: string): string {
 		const keys = key.split('.');
-		let currentTranslation: string | TranslationData | undefined = translations;
+		let currentTranslation: string | TranslationData = translations;
 
 		for (const k of keys) {
 			if (!(typeof currentTranslation === 'object' && k in currentTranslation)) {

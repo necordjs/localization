@@ -4,7 +4,7 @@ import { NecordExecutionContext } from 'necord';
 
 @Injectable()
 export class GuildResolver implements LocaleResolver {
-	resolve(context: ExecutionContext): string | string[] | undefined {
+	resolve(context: ExecutionContext): string | string[] {
 		const necordContext = NecordExecutionContext.create(context);
 		const [interaction] = necordContext.getContext<CommandContext>();
 
