@@ -7,13 +7,14 @@ import {
 	OnModuleInit,
 	Type
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
 import { NecordContextType, NecordExecutionContext } from 'necord';
-import { LOCALIZATION_ADAPTER, LOCALIZATION_RESOLVERS } from '../providers';
-import { BaseLocalizationAdapter } from '../adapters';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { LocaleResolver, TranslationFn } from '../interfaces';
 import { ModuleRef } from '@nestjs/core';
+import { Observable } from 'rxjs';
+
+import { LOCALIZATION_ADAPTER, LOCALIZATION_RESOLVERS } from '../providers';
+import { LocaleResolver, TranslationFn } from '../interfaces';
+import { BaseLocalizationAdapter } from '../adapters';
 
 @Injectable()
 export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {

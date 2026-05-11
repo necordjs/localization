@@ -1,7 +1,8 @@
 import { Module, Provider } from '@nestjs/common';
+import { IntentsBitField } from 'discord.js';
 import { NestFactory } from '@nestjs/core';
 import { NecordModule } from 'necord';
-import { IntentsBitField } from 'discord.js';
+
 import { DefaultLocalizationAdapter, NecordLocalizationModule, UserResolver } from '../src';
 
 async function getLocales() {
