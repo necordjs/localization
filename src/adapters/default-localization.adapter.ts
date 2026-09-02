@@ -13,14 +13,12 @@ export class DefaultLocalizationAdapter extends BaseLocalizationAdapter<DefaultL
 	): string {
 		const translations = this.getTranslations(locale);
 		const translation = translations[key] ?? this.getFallbackTranslation(key);
+		const placeholderValues = placeholders as Record<string, string>;
 
-		return translation.replace(/{{\s*([^}\s]+)\s*}}/g, (_, placeholder) => {
-			if (!placeholders) {
-				throw new TypeError('Placeholders are required for this translation');
-			}
-
-			return placeholders[placeholder];
-		});
+		return translation.replace(
+			/{{\s*([^}\s]+)\s*}}/g,
+			(_, placeholder) => placeholderValues[placeholder]
+		);
 	}
 
 	private getTranslations(locale: string): Record<string, string> {
