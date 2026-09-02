@@ -1,9 +1,9 @@
 import { Global, Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 
-import { ConfigurableModuleClass } from './necord-localization.module-definition';
-import { NecordLocalizationService } from './necord-localization.service';
-import { LocalizationInterceptor } from './interceptors';
+import { ConfigurableModuleClass } from './necord-localization.module-definition.js';
+import { NecordLocalizationService } from './necord-localization.service.js';
+import { LocalizationInterceptor } from './interceptors/index.js';
 
 @Global()
 @Module({

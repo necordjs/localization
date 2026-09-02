@@ -12,16 +12,22 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { ModuleRef } from '@nestjs/core';
 import { Observable } from 'rxjs';
 
-import { LOCALIZATION_ADAPTER, LOCALIZATION_RESOLVERS } from '../providers';
-import { LocaleResolver, TranslationFn } from '../interfaces';
-import { BaseLocalizationAdapter } from '../adapters';
+import { LOCALIZATION_ADAPTER, LOCALIZATION_RESOLVERS } from '../providers/index.js';
+import { LocaleResolver, TranslationFn } from '../interfaces/index.js';
+import { BaseLocalizationAdapter } from '../adapters/index.js';
 
 @Injectable()
 export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 	private static readonly LOCALIZATION_CONTEXT = new AsyncLocalStorage<TranslationFn>();
 
 	public static getCurrentTranslationFn(): TranslationFn {
-		return LocalizationInterceptor.LOCALIZATION_CONTEXT.getStore();
+		const translationFn = LocalizationInterceptor.LOCALIZATION_CONTEXT.getStore();
+
+		if (!translationFn) {
+			throw new Error('Translation function is unavailable outside a localized context');
+		}
+
+		return translationFn;
 	}
 
 	private cachedResolvers: LocaleResolver[];
@@ -53,28 +59,31 @@ export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 
 		const locale = await this.getLocale(necordContext);
 
-		return LocalizationInterceptor.LOCALIZATION_CONTEXT.run(
-			this.getTranslationFn(locale),
-			next.handle
+		return LocalizationInterceptor.LOCALIZATION_CONTEXT.run(this.getTranslationFn(locale), () =>
+			next.handle()
 		);
 	}
 
 	private async getLocale(ctx: ExecutionContext): Promise<string> {
-		let language = null;
+		let language: string | string[] | undefined;
 
 		for (const resolver of this.cachedResolvers) {
-			language = resolver.resolve(ctx);
-
-			if (language instanceof Promise) {
-				language = await (language as Promise<string>);
-			}
+			const resolvedLanguage = resolver.resolve(ctx);
+			language =
+				resolvedLanguage instanceof Promise ? await resolvedLanguage : resolvedLanguage;
 
 			if (language !== undefined) {
 				break;
 			}
 		}
 
-		return Array.isArray(language) ? language[0] : language;
+		const locale = Array.isArray(language) ? language[0] : language;
+
+		if (!locale) {
+			throw new Error('Localization resolvers did not return a locale');
+		}
+
+		return locale;
 	}
 
 	private async getResolver(
@@ -83,7 +92,7 @@ export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 		if (resolver instanceof Function) {
 			try {
 				return this.moduleRef.get(resolver, { strict: false });
-			} catch (e) {
+			} catch {
 				return this.moduleRef.create(resolver);
 			}
 		}

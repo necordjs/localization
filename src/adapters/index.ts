@@ -1,3 +1,3 @@
-export * from './base-localization.adapter';
-export * from './default-localization.adapter';
-export * from './nested-localization.adapter';
+export * from './base-localization.adapter.js';
+export * from './default-localization.adapter.js';
+export * from './nested-localization.adapter.js';

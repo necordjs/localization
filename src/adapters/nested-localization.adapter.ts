@@ -1,4 +1,4 @@
-import { BaseLocalizationAdapter } from './base-localization.adapter';
+import { BaseLocalizationAdapter } from './base-localization.adapter.js';
 
 interface TranslationData {
 	[key: string]: string | TranslationData;
@@ -29,7 +29,7 @@ export class NestedLocalizationAdapter extends BaseLocalizationAdapter<NestedLoc
 		return this.options?.locales?.[locale] ?? {};
 	}
 
-	private findTranslation(translations: TranslationData, key: string): string {
+	private findTranslation(translations: TranslationData, key: string): string | undefined {
 		const keys = key.split('.');
 		let currentTranslation: string | TranslationData = translations;
 

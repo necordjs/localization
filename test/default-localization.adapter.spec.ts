@@ -1,4 +1,4 @@
-import { DefaultLocalizationAdapter } from '../src/adapters';
+import { DefaultLocalizationAdapter } from '../src/adapters/index.js';
 
 describe('DefaultLocalizationAdapter', () => {
 	const adapter = new DefaultLocalizationAdapter({

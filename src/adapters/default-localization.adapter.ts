@@ -1,4 +1,4 @@
-import { BaseLocalizationAdapter } from './base-localization.adapter';
+import { BaseLocalizationAdapter } from './base-localization.adapter.js';
 
 interface DefaultLocalizationAdapterOptions {
 	fallbackLocale?: string;
@@ -14,10 +14,13 @@ export class DefaultLocalizationAdapter extends BaseLocalizationAdapter<DefaultL
 		const translations = this.getTranslations(locale);
 		const translation = translations[key] ?? this.getFallbackTranslation(key);
 
-		return translation.replace(
-			/{{\s*([^}\s]+)\s*}}/g,
-			(_, placeholder) => placeholders[placeholder]
-		);
+		return translation.replace(/{{\s*([^}\s]+)\s*}}/g, (_, placeholder) => {
+			if (!placeholders) {
+				throw new TypeError('Placeholders are required for this translation');
+			}
+
+			return placeholders[placeholder];
+		});
 	}
 
 	private getTranslations(locale: string): Record<string, string> {

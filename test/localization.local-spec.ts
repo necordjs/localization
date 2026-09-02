@@ -1,10 +1,4 @@
-import {
-	Context,
-	createCommandGroupDecorator,
-	SlashCommand,
-	SlashCommandContext,
-	Subcommand
-} from 'necord';
+import { Context, createCommandGroupDecorator, SlashCommandContext, Subcommand } from 'necord';
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
@@ -13,8 +7,8 @@ import {
 	LOCALIZATION_ADAPTER,
 	localizationMapByKey,
 	TranslationFn
-} from '../src';
-import { createApplication } from './application.local-spec';
+} from '../src/index.js';
+import { createApplication } from './application.local-spec.js';
 
 const PingCommands = createCommandGroupDecorator({
 	name: 'ping',

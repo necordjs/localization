@@ -1,7 +1,7 @@
 import { ExecutionContext, Injectable } from '@nestjs/common';
 import { NecordExecutionContext } from 'necord';
 
-import { CommandContext, LocaleResolver } from '../interfaces';
+import { CommandContext, LocaleResolver } from '../interfaces/index.js';
 
 @Injectable()
 export class GuildResolver implements LocaleResolver {
@@ -9,6 +9,6 @@ export class GuildResolver implements LocaleResolver {
 		const necordContext = NecordExecutionContext.create(context);
 		const [interaction] = necordContext.getContext<CommandContext>();
 
-		return interaction.guildLocale;
+		return interaction.guildLocale ?? interaction.locale;
 	}
 }
