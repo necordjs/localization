@@ -14,7 +14,7 @@ export class DefaultLocalizationAdapter extends BaseLocalizationAdapter<DefaultL
 		const translations = this.getTranslations(locale);
 		const translation = translations[key] ?? this.getFallbackTranslation(key);
 
-		return translation.replace(/{{\s*([^}\s]+)\s*}}/g, (_, placeholder) => {
+		return translation.replace(/{{\s*([^{}\s]+)\s*}}/g, (_, placeholder) => {
 			if (!placeholders) {
 				throw new TypeError('Placeholders are required for this translation');
 			}
