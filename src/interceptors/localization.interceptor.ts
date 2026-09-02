@@ -20,14 +20,8 @@ import { BaseLocalizationAdapter } from '../adapters/index.js';
 export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 	private static readonly LOCALIZATION_CONTEXT = new AsyncLocalStorage<TranslationFn>();
 
-	public static getCurrentTranslationFn(): TranslationFn {
-		const translationFn = LocalizationInterceptor.LOCALIZATION_CONTEXT.getStore();
-
-		if (!translationFn) {
-			throw new Error('Translation function is unavailable outside a localized context');
-		}
-
-		return translationFn;
+	public static getCurrentTranslationFn(): TranslationFn | undefined {
+		return LocalizationInterceptor.LOCALIZATION_CONTEXT.getStore();
 	}
 
 	private cachedResolvers: LocaleResolver[];
@@ -64,7 +58,7 @@ export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 		);
 	}
 
-	private async getLocale(ctx: ExecutionContext): Promise<string> {
+	private async getLocale(ctx: ExecutionContext): Promise<string | undefined> {
 		let language: string | string[] | undefined;
 
 		for (const resolver of this.cachedResolvers) {
@@ -77,13 +71,7 @@ export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 			}
 		}
 
-		const locale = Array.isArray(language) ? language[0] : language;
-
-		if (!locale) {
-			throw new Error('Localization resolvers did not return a locale');
-		}
-
-		return locale;
+		return Array.isArray(language) ? language[0] : language;
 	}
 
 	private async getResolver(
@@ -100,9 +88,9 @@ export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 		return resolver;
 	}
 
-	private getTranslationFn(locale: string): TranslationFn {
+	private getTranslationFn(locale: string | undefined): TranslationFn {
 		return (key: string, ...args: any[]) => {
-			return this.localizationAdapter.getTranslation(key, locale, ...args);
+			return this.localizationAdapter.getTranslation(key, locale as string, ...args);
 		};
 	}
 }

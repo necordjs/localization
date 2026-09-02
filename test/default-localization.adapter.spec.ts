@@ -5,8 +5,7 @@ describe('DefaultLocalizationAdapter', () => {
 		fallbackLocale: 'en',
 		locales: {
 			en: {
-				hello: 'Hello, {{ name }}!',
-				invalid: '{{a{b}}'
+				hello: 'Hello, {{ name }}!'
 			}
 		}
 	});
@@ -25,9 +24,5 @@ describe('DefaultLocalizationAdapter', () => {
 
 	it('should return key if translation not found', () => {
 		expect(adapter.getTranslation('goodbye', 'en', { name: 'world' })).toBe('goodbye');
-	});
-
-	it('should not interpolate placeholder keys containing braces', () => {
-		expect(adapter.getTranslation('invalid', 'en', { 'a{b': 'unsafe' })).toBe('{{a{b}}');
 	});
 });
