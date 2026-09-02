@@ -60,11 +60,15 @@ export class NecordLocalizationService implements OnModuleInit {
 	private getLocalizationMap(map: LocalizationMap | undefined): LocalizationMap | undefined {
 		if (!map) return;
 
-		return Object.entries(map).reduce((acc, [locale, value]) => {
-			acc[locale] =
-				value === null ? null : this.localizationAdapter.getTranslation(value, locale);
+		return Object.fromEntries(
+			Object.entries(map).map(([locale, value]) => [
+				locale,
+				this.getNullableTranslation(value, locale)
+			])
+		);
+	}
 
-			return acc;
-		}, {});
+	private getNullableTranslation(value: string | null, locale: string): string | null {
+		return value === null ? null : this.localizationAdapter.getTranslation(value, locale);
 	}
 }
