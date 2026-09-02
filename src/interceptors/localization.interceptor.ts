@@ -12,15 +12,15 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { ModuleRef } from '@nestjs/core';
 import { Observable } from 'rxjs';
 
-import { LOCALIZATION_ADAPTER, LOCALIZATION_RESOLVERS } from '../providers';
-import { LocaleResolver, TranslationFn } from '../interfaces';
-import { BaseLocalizationAdapter } from '../adapters';
+import { LOCALIZATION_ADAPTER, LOCALIZATION_RESOLVERS } from '../providers/index.js';
+import { LocaleResolver, TranslationFn } from '../interfaces/index.js';
+import { BaseLocalizationAdapter } from '../adapters/index.js';
 
 @Injectable()
 export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 	private static readonly LOCALIZATION_CONTEXT = new AsyncLocalStorage<TranslationFn>();
 
-	public static getCurrentTranslationFn(): TranslationFn {
+	public static getCurrentTranslationFn(): TranslationFn | undefined {
 		return LocalizationInterceptor.LOCALIZATION_CONTEXT.getStore();
 	}
 
@@ -53,21 +53,18 @@ export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 
 		const locale = await this.getLocale(necordContext);
 
-		return LocalizationInterceptor.LOCALIZATION_CONTEXT.run(
-			this.getTranslationFn(locale),
-			next.handle
+		return LocalizationInterceptor.LOCALIZATION_CONTEXT.run(this.getTranslationFn(locale), () =>
+			next.handle()
 		);
 	}
 
-	private async getLocale(ctx: ExecutionContext): Promise<string> {
-		let language = null;
+	private async getLocale(ctx: ExecutionContext): Promise<string | undefined> {
+		let language: string | string[] | undefined;
 
 		for (const resolver of this.cachedResolvers) {
-			language = resolver.resolve(ctx);
-
-			if (language instanceof Promise) {
-				language = await (language as Promise<string>);
-			}
+			const resolvedLanguage = resolver.resolve(ctx);
+			language =
+				resolvedLanguage instanceof Promise ? await resolvedLanguage : resolvedLanguage;
 
 			if (language !== undefined) {
 				break;
@@ -83,7 +80,7 @@ export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 		if (resolver instanceof Function) {
 			try {
 				return this.moduleRef.get(resolver, { strict: false });
-			} catch (e) {
+			} catch {
 				return this.moduleRef.create(resolver);
 			}
 		}
@@ -91,9 +88,9 @@ export class LocalizationInterceptor implements NestInterceptor, OnModuleInit {
 		return resolver;
 	}
 
-	private getTranslationFn(locale: string): TranslationFn {
+	private getTranslationFn(locale: string | undefined): TranslationFn {
 		return (key: string, ...args: any[]) => {
-			return this.localizationAdapter.getTranslation(key, locale, ...args);
+			return this.localizationAdapter.getTranslation(key, locale as string, ...args);
 		};
 	}
 }

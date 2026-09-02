@@ -1,2 +1,2 @@
-export * from './guild.resolver';
-export * from './user.resolver';
+export * from './guild.resolver.js';
+export * from './user.resolver.js';

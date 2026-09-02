@@ -1,1 +1,1 @@
-export * from './localization-map-by-key.util';
+export * from './localization-map-by-key.util.js';

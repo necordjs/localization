@@ -1,2 +1,2 @@
-export * from './localization-adapter.provider';
-export * from './localization-resolvers.provider';
+export * from './localization-adapter.provider.js';
+export * from './localization-resolvers.provider.js';

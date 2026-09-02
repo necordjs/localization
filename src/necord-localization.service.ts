@@ -2,8 +2,8 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { CommandDiscovery, CommandsService } from 'necord';
 import { LocalizationMap } from 'discord-api-types/v10';
 
-import { DefaultLocalizationAdapter } from './adapters';
-import { LOCALIZATION_ADAPTER } from './providers';
+import { DefaultLocalizationAdapter } from './adapters/index.js';
+import { LOCALIZATION_ADAPTER } from './providers/index.js';
 
 @Injectable()
 export class NecordLocalizationService implements OnModuleInit {
@@ -57,11 +57,13 @@ export class NecordLocalizationService implements OnModuleInit {
 		}
 	}
 
-	private getLocalizationMap(map: LocalizationMap): LocalizationMap {
+	private getLocalizationMap(map: LocalizationMap | undefined): LocalizationMap | undefined {
 		if (!map) return;
 
 		return Object.entries(map).reduce((acc, [locale, value]) => {
-			acc[locale] = this.localizationAdapter.getTranslation(value, locale);
+			acc[locale] =
+				value === null ? null : this.localizationAdapter.getTranslation(value, locale);
+
 			return acc;
 		}, {});
 	}

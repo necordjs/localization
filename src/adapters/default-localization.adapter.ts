@@ -1,4 +1,4 @@
-import { BaseLocalizationAdapter } from './base-localization.adapter';
+import { BaseLocalizationAdapter } from './base-localization.adapter.js';
 
 interface DefaultLocalizationAdapterOptions {
 	fallbackLocale?: string;
@@ -13,10 +13,11 @@ export class DefaultLocalizationAdapter extends BaseLocalizationAdapter<DefaultL
 	): string {
 		const translations = this.getTranslations(locale);
 		const translation = translations[key] ?? this.getFallbackTranslation(key);
+		const placeholderValues = placeholders as Record<string, string>;
 
 		return translation.replace(
 			/{{\s*([^}\s]+)\s*}}/g,
-			(_, placeholder) => placeholders[placeholder]
+			(_, placeholder) => placeholderValues[placeholder]
 		);
 	}
 

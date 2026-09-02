@@ -3,7 +3,11 @@ import { IntentsBitField } from 'discord.js';
 import { NestFactory } from '@nestjs/core';
 import { NecordModule } from 'necord';
 
-import { DefaultLocalizationAdapter, NecordLocalizationModule, UserResolver } from '../src';
+import {
+	DefaultLocalizationAdapter,
+	NecordLocalizationModule,
+	UserResolver
+} from '../src/index.js';
 
 async function getLocales() {
 	return {
@@ -19,10 +23,17 @@ async function getLocales() {
 }
 
 export const createApplication = (...providers: Provider[]) => {
+	const discordToken = process.env.DISCORD_TOKEN;
+	const testGuild = process.env.DISCORD_TEST_GUILD;
+
+	if (!discordToken || !testGuild) {
+		throw new Error('DISCORD_TOKEN and DISCORD_TEST_GUILD are required for local tests');
+	}
+
 	@Module({
 		imports: [
 			NecordModule.forRoot({
-				token: process.env.DISCORD_TOKEN,
+				token: discordToken,
 				intents: [
 					IntentsBitField.Flags.Guilds,
 					IntentsBitField.Flags.DirectMessages,
@@ -31,7 +42,7 @@ export const createApplication = (...providers: Provider[]) => {
 					IntentsBitField.Flags.MessageContent
 				],
 				prefix: '!',
-				development: [process.env.DISCORD_TEST_GUILD]
+				development: [testGuild]
 			}),
 			NecordLocalizationModule.forRootAsync({
 				useFactory: async () => {

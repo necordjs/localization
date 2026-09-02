@@ -1,1 +1,1 @@
-export * from './localization.interceptor';
+export * from './localization.interceptor.js';
